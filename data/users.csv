@@ -1,0 +1,14 @@
+user_id,name,role,age,language,preferences
+USER001,John Doe,student,25.0,English,AI and Machine Learning
+USER002,Jane Smith,professional,32.0,English,Data Science and Analytics
+USER003,Bob Johnson,researcher,28.0,French,Healthcare and Medical Research
+USER004,Alice Brown,student,22.0,Spanish,Education Technology
+USER005,Charlie Wilson,professional,35.0,English,Business Intelligence 
+USERF811774D,Bima,student,25.0,English,AI
+USER007,Ali Haider,researcher,25.0,English,Education
+USER008,Ali Haider,researcher,25.0,English,Education
+USER009,Rafay Khaliq,professional,29.0,English,AI
+USER010,Bima Maulana,,,,
+USER011,Ali Mumtaz,,,,
+USER012,Asad Rehman,,,,
+USER013,Alan Lamb,,,,
