@@ -7,7 +7,7 @@ from assistant import predict, validate_user, register_user
 with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
     
     gr.Markdown(
-            """# Welcome to Visionnaire 
+            """# Welcome to Visionnaire: A Personalized AI Assistant 
             Please login or register to continue.
             """
         )
