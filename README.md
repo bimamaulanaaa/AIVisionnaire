@@ -17,9 +17,9 @@ cd AIVisionnaire
 
 2. Set up the application and install relevant libraries
 ```bash
-conda create --name py39 python=3.9
+conda create --name visionnaire python=3.9
 
-source activate py39
+source activate visionnaire
 
 pip install -r requirementstwo.txt
 ```
