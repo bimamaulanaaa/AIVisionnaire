@@ -1,12 +1,12 @@
 # AIVisionnaire
 
-This project implements Visionnaire, a personalized AI Assistant with flexibility and persistent memory using GPT-4o. The whole project is built using Python 3.10.
+This project implements Visionnaire, a personalized AI Assistant with flexibility and persistent memory using GPT-4o. The whole project is built using Python 3.9.
 
 # Set up and Installation
 
 ### Run Project in a local system environment 
 
-The project can be run in a local system environment. For that purpose a conda environment should be created (**python 3.10**) to preserve the existant packages and dependencies in the system. The requirementstwo file should then be run in the environment to import the required libraries for the project. Once packages are imported the project can be run.
+The project can be run in a local system environment. For that purpose a conda environment should be created (**python 3.9**) to preserve the existant packages and dependencies in the system. The requirementstwo file should then be run in the environment to import the required libraries for the project. Once packages are imported the project can be run.
 
 1. Clone the repository
 ```bash
@@ -17,9 +17,9 @@ cd AIVisionnaire
 
 2. Set up the application and install relevant libraries
 ```bash
-conda create --name py310 python=3.10
+conda create --name py39 python=3.9
 
-source activate py310
+source activate py39
 
 pip install -r requirementstwo.txt
 ```
@@ -51,7 +51,7 @@ python gradio-frontend.py
 - Tiktoken
 
 ### Prerequisites
-- Python 3.10 or Python 3.9
+- Python 3.9 or Python 3.10
 - Pinecone Vector Database
 - API keys for:
   - Pinecone
