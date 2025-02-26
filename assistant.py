@@ -5,7 +5,7 @@ import langchain
 import pinecone
 import pandas as pd
 from datetime import datetime
-from pinecone import Pinecone as PineconeClient
+from pinecone import Pinecone, ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
 from langchain.schema import AIMessage, HumanMessage
 from langchain.chains import RetrievalQA
@@ -18,17 +18,33 @@ from dotenv import load_dotenv, find_dotenv
 _ = load_dotenv(find_dotenv())
 openai_api_key = os.getenv("OPENAI_API_KEY")
 embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-PineconeClient.api_key = os.environ["PINECONE_API_KEY"]
-PineconeClient.environment = os.environ["PINECONE_ENV"]
-PineconeClient.index = os.environ["PINECONE_INDEX_NAME"]
-pinecone = PineconeClient(api_key = PineconeClient.api_key, environment = PineconeClient.environment)
-index = pinecone.Index(PineconeClient.index)
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
+
+# Initialize Pinecone
+pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+
+# Create index if it doesn't exist
+index_name = os.getenv("PINECONE_INDEX_NAME")
+try:
+    # Try to get the index first
+    index = pc.Index(index_name)
+except Exception:
+    # If index doesn't exist, create it
+    pc.create_index(
+        name=index_name,
+        spec=ServerlessSpec(
+            cloud="aws",
+            region="us-east-1"
+        ),
+        dimension=1536,  # dimensionality of text-embedding-ada-002
+        metric='cosine'
+    )
+    index = pc.Index(index_name)
+
+llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
 vector_store = PineconeVectorStore(index, embeddings, "text")
 
-
 template = """
-You are a chatbot. Use the following context (delimited by <ctx></ctx>) and the chat history (delimited by <hs></hs>) to answer the question:
+You are a helpful AI assistant. Use the following context (delimited by <ctx></ctx>) and the chat history (delimited by <hs></hs>) to answer the question:
 ------
 <ctx>
 {context}
@@ -47,27 +63,22 @@ prompt = PromptTemplate(
     template=template,
 )
 
-
 def validate_user(user_id: str) -> tuple:    
     """Validate user ID against the CSV file."""
-    
-    
-    with open('data/users.csv', 'r') as read_obj:
-        csv_reader = csv.reader(read_obj)
-        list_of_rows = list(csv_reader)
-        list_of_rows = list_of_rows[1:]
-        for row in list_of_rows:
-            for value in range(0, 1):
-                if(row[value]) == user_id:
-                    print(row[value], row)
-                    return "True", "Login successful! Welcome to the chatbot."
-        return False, "Invalid user ID. Please try again."        
-
+    try:
+        with open('data/users.csv', 'r') as read_obj:
+            csv_reader = csv.reader(read_obj)
+            list_of_rows = list(csv_reader)
+            list_of_rows = list_of_rows[1:]
+            for row in list_of_rows:
+                if row[0] == user_id:
+                    return True, "Login successful! Welcome to the chatbot."
+            return False, "Invalid user ID. Please try again."
+    except Exception as e:
+        return False, f"Error validating user: {str(e)}"
 
 def register_user(name: str):        
     """Register a new user with preferences."""
-    
-    
     try:
         # Generate a new user ID
         user_data_df = pd.read_csv('data/users.csv')
@@ -88,18 +99,22 @@ def register_user(name: str):
     except Exception as e:
         return False, f"Registration failed: {str(e)}"
 
-
 def get_user_chat_history(user_id):
-    "Retrieve user chat history from pinecone"
-    
-    
+    """Retrieve user chat history from pinecone"""
     try:
-        results = index.query(vector=[0] * 1536, filter={"user_id": user_id}, top_k=1000, include_metadata=True)    
+        results = index.query(
+            vector=[0] * 1536,
+            filter={"user_id": user_id},
+            top_k=1000,
+            include_metadata=True
+        )
+        
         history = []
-        sorted_matches = sorted(results["matches"], key=lambda x: x["metadata"].get("timestamp", ""))
-        for result in sorted_matches:
-            human_message = result["metadata"].get("human_message", "")
-            ai_message = result["metadata"].get("ai_message", "")
+        sorted_matches = sorted(results.matches, key=lambda x: x.metadata.get("timestamp", ""))
+        
+        for match in sorted_matches:
+            human_message = match.metadata.get("human_message", "")
+            ai_message = match.metadata.get("ai_message", "")
             if human_message:
                 history.append(HumanMessage(content=human_message))
             if ai_message:
@@ -107,90 +122,78 @@ def get_user_chat_history(user_id):
         return history
     except Exception as e:
         print(f"Error retrieving chat history for user {user_id}: {e}")
-        return []  # Return empty history if there is an error
-
+        return []
 
 def store_chat_in_pinecone(user_id, human_message, ai_message):
-    "Store user chats in pinecone"
-    
-    
-    unique_id = f"{user_id}_{datetime.utcnow().isoformat()}"
-    vector = embeddings.embed_query(human_message)
-
-    if not vector or not isinstance(vector, list):
-        raise ValueError(f"Invalid vector generated: {vector}")
-
-    metadata = {
-        "user_id": user_id,
-        "timestamp": datetime.utcnow().isoformat(),
-        "human_message": human_message,
-        "ai_message": ai_message,
-    }
-
-    print(f"Upserting with ID: {unique_id}, Vector Length: {len(vector)}, Metadata: {metadata}")
-
-    # Upsert the data into Pinecone
+    """Store user chats in pinecone"""
     try:
+        unique_id = f"{user_id}_{datetime.utcnow().isoformat()}"
+        vector = embeddings.embed_query(human_message)
+
+        metadata = {
+            "user_id": user_id,
+            "timestamp": datetime.utcnow().isoformat(),
+            "human_message": human_message,
+            "ai_message": ai_message,
+        }
+
+        # Upsert the data into Pinecone
         index.upsert(
-            vectors=[(unique_id, vector, metadata)]
+            vectors=[
+                {
+                    "id": unique_id,
+                    "values": vector,
+                    "metadata": metadata
+                }
+            ]
         )
-    except Exception as e:
-        raise ValueError(f"Error during Pinecone upsert: {e}")
-
-
-def predict(message, history, user_id):
-    """Handles user input, retrieves previous chat history, and generates a response using LangChain."""
-
-
-    previous_history = get_user_chat_history(user_id)
-    print("Previous history:", previous_history)
-
-    # Format current session history for LangChain
-    current_history = []
-    for human, ai in history:
-        current_history.append(HumanMessage(content=human))
-        current_history.append(AIMessage(content=ai))
-    
-    print("Current history:", current_history)
-
-    if(previous_history == current_history):
-        full_history = current_history
-    else:
-        full_history = previous_history
-    
-    full_history.append(HumanMessage(content=message))
-
-    print("Full history:", full_history)
-
-    # Create QA system with the combined history
-    memory = ConversationBufferMemory(
-        memory_key="history",
-        input_key="question"
-    )
-    memory.chat_memory.messages = full_history
-
-    qa = RetrievalQA.from_chain_type(
-        llm=llm,
-        chain_type="stuff",
-        retriever=vector_store.as_retriever(namespace=user_id),
-        chain_type_kwargs={
-            "verbose": True,
-            "prompt": prompt,
-            "memory": memory
-        },
-    )
-
-    try:
-        answer = qa.run(message)
-    except Exception as e:
-        print(f"Error during response generation: {e}")
-        answer = f"Error during response generation: {e}"
-    
-    try:
-        store_chat_in_pinecone(user_id, message, answer)
     except Exception as e:
         print(f"Error storing chat in Pinecone: {e}")
 
-    # Update Gradio's history with the new interaction
-    history.append((message, answer))
-    return history, history
+def predict(message, history, user_id):
+    """Handles user input, retrieves previous chat history, and generates a response using LangChain."""
+    try:
+        # Format current session history for LangChain
+        current_history = []
+        for human, ai in history:
+            current_history.append(HumanMessage(content=human))
+            current_history.append(AIMessage(content=ai))
+        
+        # Get previous history from Pinecone
+        previous_history = get_user_chat_history(user_id)
+        
+        # Combine histories
+        full_history = previous_history + current_history
+        full_history.append(HumanMessage(content=message))
+
+        # Create QA system with the combined history
+        memory = ConversationBufferMemory(
+            memory_key="history",
+            input_key="question"
+        )
+        memory.chat_memory.messages = full_history
+
+        qa = RetrievalQA.from_chain_type(
+            llm=llm,
+            chain_type="stuff",
+            retriever=vector_store.as_retriever(namespace=user_id),
+            chain_type_kwargs={
+                "verbose": True,
+                "prompt": prompt,
+                "memory": memory
+            },
+        )
+
+        answer = qa.run(message)
+        
+        # Store the interaction in Pinecone
+        store_chat_in_pinecone(user_id, message, answer)
+        
+        # Update Gradio's history with the new interaction
+        history.append((message, answer))
+        return history, history
+        
+    except Exception as e:
+        error_message = f"Error generating response: {str(e)}"
+        history.append((message, error_message))
+        return history, history
