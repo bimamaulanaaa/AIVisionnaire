@@ -1,69 +1,84 @@
-# AIVisionnaire
+# AI Visionnaire
 
-This project implements Visionnaire, a personalized AI Assistant with flexibility and persistent memory using GPT-4o. The whole project is built using Python 3.9.
+An AI-powered chat application with secure authentication using Ory Cloud.
 
-# Set up and Installation
+## Features
 
-### Run Project in a local system environment 
+- Secure authentication with Ory Cloud
+- AI chat capabilities using OpenAI
+- Vector storage with Pinecone
+- Modern UI with Gradio
 
-The project can be run in a local system environment. For that purpose a conda environment should be created (**python 3.9**) to preserve the existant packages and dependencies in the system. The requirementstwo file should then be run in the environment to import the required libraries for the project. Once packages are imported the project can be run.
+## Prerequisites
 
-1. Clone the repository
+- Python 3.8 or higher
+- Ory Cloud account
+- OpenAI API key
+- Pinecone API key
+
+## Setup
+
+1. Clone the repository:
 ```bash
-git clone https://github.com/TSQCH/AIVisionnaire.git
-
+git clone <your-repo-url>
 cd AIVisionnaire
 ```
 
-2. Set up the application and install relevant libraries
+2. Create and activate a virtual environment:
 ```bash
-conda create --name visionnaire python=3.9
+python -m venv venv
+# On Windows:
+venv\Scripts\activate
+# On macOS/Linux:
+source venv/bin/activate
+```
 
-source activate visionnaire
-
+3. Install dependencies:
+```bash
 pip install -r requirementstwo.txt
 ```
 
-3. Configure environment variables:
-
-Backend (.env):
-```env
-OPENAI_API_KEY=your_openai_key
-PINECONE_INDEX_NAME=your_pinecone_indexname
-PINECONE_API_KEY=your_pinecone_apikey
-PINECONE_ENV=your_pinecone_env
+4. Copy `.env.example` to `.env` and fill in your credentials:
+```bash
+cp .env.example .env
 ```
 
-4. Run the application
+5. Update the `.env` file with your:
+   - OpenAI API key
+   - Pinecone API key and settings
+   - Ory Cloud project URL and API key
+
+## Running the Application
+
 ```bash
 python gradio-frontend.py
 ```
 
-## Libraries
+The application will be available at `http://localhost:7860`
 
-### Frontend
-- Gradio
+## Environment Variables
 
-### Backend
-- Langchain
-- Pinecone
-- OpenAI
-- Tiktoken
+- `OPENAI_API_KEY`: Your OpenAI API key
+- `PINECONE_API_KEY`: Your Pinecone API key
+- `PINECONE_ENV`: Your Pinecone environment
+- `PINECONE_INDEX_NAME`: Your Pinecone index name
+- `ORY_PROJECT_URL`: Your Ory Cloud project URL
+- `ORY_API_KEY`: Your Ory Cloud API key
 
-### Prerequisites
-- Python 3.9 or Python 3.10
-- Pinecone Vector Database
-- API keys for:
-  - Pinecone
-  - OpenAI
-  
 ## Project Structure
 
-```
-.
-├── data/               # data folder to record users registered with the chatbot
-│   ├── users.csv
-│── assistant.py        # python file containing the backend pipeline of the chatbot's functionalities
-│── gradio-fronend.py   # python file containing the frontend features of the chatbot
-│── requirementstwo.txt # text file containing the libraries required to run the application
-```
+- `gradio-frontend.py`: Main application file with Gradio UI
+- `auth_handler.py`: Authentication handling with Ory Cloud
+- `auth_config.py`: Ory Cloud configuration
+- `assistant.py`: AI chat functionality
+- `requirementstwo.txt`: Python dependencies
+
+## Security Notes
+
+- Never commit your `.env` file
+- Keep your API keys secure
+- Use environment variables for sensitive data
+
+## License
+
+[Your License Here]
