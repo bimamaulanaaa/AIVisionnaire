@@ -170,4 +170,4 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
         outputs=[chatbot, main_interface, login_section]
     )
 
-demo.launch(share=True)
+demo.launch(server_name="127.0.0.1", server_port=7860, share=False)
