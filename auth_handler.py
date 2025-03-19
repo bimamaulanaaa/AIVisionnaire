@@ -110,13 +110,17 @@ class AuthHandler:
                 
             print(f"Registration flow initialized with ID: {flow_id}")
             
-            # Prepare registration payload
+            # Dump the full flow data to analyze
+            with open('registration_flow.json', 'w') as f:
+                json.dump(flow_data, f, indent=2)
+                print("Saved registration flow data to registration_flow.json for debugging")
+            
+            # Try a simpler approach with just email and password
             registration_payload = {
                 "method": "password",
                 "password": password,
                 "traits": {
-                    "email": email,
-                    "name": name
+                    "email": email
                 }
             }
             
@@ -143,6 +147,15 @@ class AuthHandler:
             
             # Debug output
             print(f"Registration response status: {registration_response.status_code}")
+            print(f"Registration response body: {registration_response.text}")
+            
+            # Save the registration response for detailed analysis
+            try:
+                with open('registration_response.json', 'w') as f:
+                    json.dump(registration_response.json(), f, indent=2)
+                    print("Saved registration response to registration_response.json for debugging")
+            except:
+                print("Could not save response as JSON, it may not be valid JSON format")
             
             if registration_response.status_code == 200:
                 print("Registration successful")
@@ -151,6 +164,8 @@ class AuthHandler:
             # Try to extract error message
             try:
                 error_data = registration_response.json()
+                
+                # Check if there's a specific error message
                 error_msg = error_data.get('error', {}).get('message')
                 if error_msg:
                     print(f"Registration error: {error_msg}")
@@ -168,11 +183,18 @@ class AuthHandler:
                     print(f"Registration UI errors: {error_str}")
                     return False, f"Registration failed: {error_str}"
                 
+                # Check for any errors in the response text
+                if "error" in registration_response.text.lower():
+                    print("Found error in response text")
+                    return False, "Registration failed: Error in response. See logs for details."
+                
             except Exception as e:
                 print(f"Error parsing registration response: {str(e)}")
-                
-            print(f"Registration failed with unknown error")
-            return False, "Registration failed. Please try again with different credentials."
+            
+            print(f"Registration failed with unknown error or invalid schema configuration")
+            if 'name' in registration_response.text:
+                return False, "Registration failed: The 'name' field is not allowed in this Ory configuration. Try registering without a name."
+            return False, "Registration failed. Try using only email and password."
 
         except requests.RequestException as e:
             print(f"Network error during registration: {str(e)}")
@@ -230,7 +252,7 @@ class AuthHandler:
                 user_data = {
                     "id": identity.get('id'),
                     "email": traits.get('email'),
-                    "name": traits.get('name')
+                    "name": traits.get('name', 'User')  # Default to 'User' if name is not present
                 }
                 
                 print(f"Session valid for user: {user_data['email']}")

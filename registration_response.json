@@ -1,0 +1,107 @@
+{
+  "session_token": "ory_st_oiuugTt7hnw9LWZDxxxe3TovVIo9Y8CP",
+  "session": {
+    "id": "e5dc678e-975d-426d-bd2e-70f9700d7539",
+    "active": true,
+    "expires_at": "2025-03-22T06:08:18.992194381Z",
+    "authenticated_at": "2025-03-19T06:08:18.992194381Z",
+    "authenticator_assurance_level": "aal1",
+    "authentication_methods": [
+      {
+        "method": "password",
+        "aal": "aal1",
+        "completed_at": "2025-03-19T06:08:18.992193331Z"
+      }
+    ],
+    "issued_at": "2025-03-19T06:08:18.992194381Z",
+    "identity": {
+      "id": "9d6fd83c-0893-4012-9e92-872a0725f6a9",
+      "schema_id": "preset://email",
+      "schema_url": "https://musing-lamport-s483te6loq.projects.oryapis.com/schemas/cHJlc2V0Oi8vZW1haWw",
+      "state": "active",
+      "state_changed_at": "2025-03-19T06:08:18.344276429Z",
+      "traits": {
+        "email": "jokobudidarmawan@gmail.com"
+      },
+      "verifiable_addresses": [
+        {
+          "id": "df23a517-21fc-4a3b-a04b-9a6f17047d74",
+          "value": "jokobudidarmawan@gmail.com",
+          "verified": false,
+          "via": "email",
+          "status": "sent",
+          "created_at": "2025-03-19T06:08:18.353162Z",
+          "updated_at": "2025-03-19T06:08:18.353162Z"
+        }
+      ],
+      "recovery_addresses": [
+        {
+          "id": "a982c6fa-1f3d-40c3-aba4-2156d57a32f4",
+          "value": "jokobudidarmawan@gmail.com",
+          "via": "email",
+          "created_at": "2025-03-19T06:08:18.510624Z",
+          "updated_at": "2025-03-19T06:08:18.510624Z"
+        }
+      ],
+      "metadata_public": null,
+      "created_at": "2025-03-19T06:08:18.34788Z",
+      "updated_at": "2025-03-19T06:08:18.34788Z",
+      "organization_id": null
+    },
+    "devices": [
+      {
+        "id": "8231ac50-d2f3-43d4-abca-a8f73e31d21e",
+        "ip_address": "2001:448a:10cd:1306:7c0f:a6c0:6845:8e8f",
+        "user_agent": "python-requests/2.31.0",
+        "location": "Medan, ID"
+      }
+    ]
+  },
+  "identity": {
+    "id": "9d6fd83c-0893-4012-9e92-872a0725f6a9",
+    "schema_id": "preset://email",
+    "schema_url": "https://musing-lamport-s483te6loq.projects.oryapis.com/schemas/cHJlc2V0Oi8vZW1haWw",
+    "state": "active",
+    "state_changed_at": "2025-03-19T06:08:18.344276429Z",
+    "traits": {
+      "email": "jokobudidarmawan@gmail.com"
+    },
+    "verifiable_addresses": [
+      {
+        "id": "df23a517-21fc-4a3b-a04b-9a6f17047d74",
+        "value": "jokobudidarmawan@gmail.com",
+        "verified": false,
+        "via": "email",
+        "status": "sent",
+        "created_at": "2025-03-19T06:08:18.353162Z",
+        "updated_at": "2025-03-19T06:08:18.353162Z"
+      }
+    ],
+    "recovery_addresses": [
+      {
+        "id": "a982c6fa-1f3d-40c3-aba4-2156d57a32f4",
+        "value": "jokobudidarmawan@gmail.com",
+        "via": "email",
+        "created_at": "2025-03-19T06:08:18.510624Z",
+        "updated_at": "2025-03-19T06:08:18.510624Z"
+      }
+    ],
+    "metadata_public": null,
+    "created_at": "2025-03-19T06:08:18.34788Z",
+    "updated_at": "2025-03-19T06:08:18.34788Z",
+    "organization_id": null
+  },
+  "continue_with": [
+    {
+      "action": "show_verification_ui",
+      "flow": {
+        "id": "f2ea45b4-1805-494b-b862-33ad3003af90",
+        "verifiable_address": "jokobudidarmawan@gmail.com"
+      }
+    },
+    {
+      "action": "set_ory_session_token",
+      "ory_session_token": "ory_st_oiuugTt7hnw9LWZDxxxe3TovVIo9Y8CP"
+    }
+  ]
+}

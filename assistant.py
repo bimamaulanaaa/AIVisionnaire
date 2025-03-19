@@ -102,44 +102,23 @@ def register_user(name: str):
 def get_user_chat_history(user_id):
     """Retrieve user chat history from pinecone"""
     try:
-        if not user_id:
-            print("Warning: User ID is empty, cannot retrieve chat history")
-            return []
-            
-        print(f"Fetching chat history for user: {user_id}")
-        
-        # Query with a filter for this specific user
         results = index.query(
-            vector=[0] * 1536,  # Dummy vector for metadata filtering
+            vector=[0] * 1536,
             filter={"user_id": user_id},
-            top_k=100,  # Increase to get more history
+            top_k=1000,
             include_metadata=True
         )
         
-        # Log the number of matches found
-        print(f"Found {len(results.matches)} history entries for user {user_id}")
-        
-        # Process the matches
         history = []
-        if results.matches:
-            # Sort by timestamp to get chronological order
-            sorted_matches = sorted(
-                results.matches, 
-                key=lambda x: x.metadata.get("timestamp", "") if x.metadata else ""
-            )
-            
-            for match in sorted_matches:
-                if not match.metadata:
-                    continue
-                    
-                human_message = match.metadata.get("human_message", "")
-                ai_message = match.metadata.get("ai_message", "")
-                
-                if human_message:
-                    history.append(HumanMessage(content=human_message))
-                if ai_message:
-                    history.append(AIMessage(content=ai_message))
+        sorted_matches = sorted(results.matches, key=lambda x: x.metadata.get("timestamp", ""))
         
+        for match in sorted_matches:
+            human_message = match.metadata.get("human_message", "")
+            ai_message = match.metadata.get("ai_message", "")
+            if human_message:
+                history.append(HumanMessage(content=human_message))
+            if ai_message:
+                history.append(AIMessage(content=ai_message))
         return history
     except Exception as e:
         print(f"Error retrieving chat history for user {user_id}: {e}")
@@ -148,29 +127,17 @@ def get_user_chat_history(user_id):
 def store_chat_in_pinecone(user_id, human_message, ai_message):
     """Store user chats in pinecone"""
     try:
-        if not user_id:
-            print("Warning: User ID is empty, cannot store chat")
-            return
-            
-        print(f"Storing chat for user: {user_id}")
-        
-        # Create a unique ID for this message pair
-        timestamp = datetime.utcnow().isoformat()
-        unique_id = f"{user_id}_{timestamp}"
-        
-        # Create the embedding for the human message
+        unique_id = f"{user_id}_{datetime.utcnow().isoformat()}"
         vector = embeddings.embed_query(human_message)
 
-        # Create metadata
         metadata = {
             "user_id": user_id,
-            "timestamp": timestamp,
+            "timestamp": datetime.utcnow().isoformat(),
             "human_message": human_message,
             "ai_message": ai_message,
         }
 
         # Upsert the data into Pinecone
-        print(f"Upserting to Pinecone with ID: {unique_id}")
         index.upsert(
             vectors=[
                 {
@@ -180,21 +147,12 @@ def store_chat_in_pinecone(user_id, human_message, ai_message):
                 }
             ]
         )
-        print(f"Successfully stored chat in Pinecone for user {user_id}")
     except Exception as e:
         print(f"Error storing chat in Pinecone: {e}")
 
 def predict(message, history, user_id):
     """Handles user input, retrieves previous chat history, and generates a response using LangChain."""
     try:
-        if not message or not user_id:
-            print(f"Warning: Empty message or user_id - message: '{message}', user_id: '{user_id}'")
-            if history:
-                return history, history
-            return [], []
-            
-        print(f"Processing message for user: {user_id}")
-        
         # Format current session history for LangChain
         current_history = []
         for human, ai in history:
@@ -202,9 +160,7 @@ def predict(message, history, user_id):
             current_history.append(AIMessage(content=ai))
         
         # Get previous history from Pinecone
-        print("Retrieving previous chat history from Pinecone")
         previous_history = get_user_chat_history(user_id)
-        print(f"Retrieved {len(previous_history)} previous messages")
         
         # Combine histories
         full_history = previous_history + current_history
@@ -228,12 +184,9 @@ def predict(message, history, user_id):
             },
         )
 
-        print("Generating response...")
         answer = qa.run(message)
-        print(f"Generated response: {answer[:100]}...")
         
         # Store the interaction in Pinecone
-        print("Storing conversation in Pinecone")
         store_chat_in_pinecone(user_id, message, answer)
         
         # Update Gradio's history with the new interaction
@@ -242,6 +195,5 @@ def predict(message, history, user_id):
         
     except Exception as e:
         error_message = f"Error generating response: {str(e)}"
-        print(f"Error in predict function: {error_message}")
         history.append((message, error_message))
         return history, history

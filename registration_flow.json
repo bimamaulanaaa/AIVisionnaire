@@ -1,0 +1,91 @@
+{
+  "id": "c2f25db1-3056-42a0-aa38-264fb08caef5",
+  "type": "api",
+  "expires_at": "2025-03-19T07:08:14.716945796Z",
+  "issued_at": "2025-03-19T06:08:14.716945796Z",
+  "request_url": "https://musing-lamport-s483te6loq.projects.oryapis.com/self-service/registration/api",
+  "ui": {
+    "action": "https://musing-lamport-s483te6loq.projects.oryapis.com/self-service/registration?flow=c2f25db1-3056-42a0-aa38-264fb08caef5",
+    "method": "POST",
+    "nodes": [
+      {
+        "type": "input",
+        "group": "default",
+        "attributes": {
+          "name": "csrf_token",
+          "type": "hidden",
+          "value": "",
+          "required": true,
+          "disabled": false,
+          "node_type": "input"
+        },
+        "messages": [],
+        "meta": {}
+      },
+      {
+        "type": "input",
+        "group": "password",
+        "attributes": {
+          "name": "traits.email",
+          "type": "email",
+          "required": true,
+          "autocomplete": "email",
+          "disabled": false,
+          "node_type": "input"
+        },
+        "messages": [],
+        "meta": {
+          "label": {
+            "id": 1070002,
+            "text": "E-Mail",
+            "type": "info",
+            "context": {
+              "title": "E-Mail"
+            }
+          }
+        }
+      },
+      {
+        "type": "input",
+        "group": "password",
+        "attributes": {
+          "name": "password",
+          "type": "password",
+          "required": true,
+          "autocomplete": "new-password",
+          "disabled": false,
+          "node_type": "input"
+        },
+        "messages": [],
+        "meta": {
+          "label": {
+            "id": 1070001,
+            "text": "Password",
+            "type": "info"
+          }
+        }
+      },
+      {
+        "type": "input",
+        "group": "password",
+        "attributes": {
+          "name": "method",
+          "type": "submit",
+          "value": "password",
+          "disabled": false,
+          "node_type": "input"
+        },
+        "messages": [],
+        "meta": {
+          "label": {
+            "id": 1040001,
+            "text": "Sign up",
+            "type": "info"
+          }
+        }
+      }
+    ]
+  },
+  "organization_id": null,
+  "state": "choose_method"
+}

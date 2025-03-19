@@ -211,4 +211,6 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
         outputs=[chatbot, main_interface, login_section, message_input]
     )
 
-demo.launch(server_name="127.0.0.1", server_port=7861, share=False)
+# Change server_name from 127.0.0.1 to 0.0.0.0 to make it publicly accessible
+# This will make it listen on all network interfaces
+demo.launch(server_name="0.0.0.0", server_port=7861, share=True)
