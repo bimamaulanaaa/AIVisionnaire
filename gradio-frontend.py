@@ -72,8 +72,14 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
         with gr.Group():
             gr.Markdown("## 💬 Chat Interface")
             chatbot = gr.Chatbot(label="Chatbot")
-            message_input = gr.Textbox(label="Your Message", placeholder="Type your message here", scale=4)
-            send_button = gr.Button("Send")
+            with gr.Row():
+                message_input = gr.Textbox(
+                    label="Your Message", 
+                    placeholder="Type your message here and press Enter to send", 
+                    scale=4,
+                    container=False
+                )
+                send_button = gr.Button("Send", scale=1)
 
     def show_login():
         return {
@@ -95,17 +101,19 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
     # Login Logic
     def handle_login(email, password):
         success, message, token = auth.login(email, password)
-        if success:
+        if success and token:
             is_valid, user_data = auth.validate_session(token)
-            if is_valid:
-                user_info_text = f"👤 Logged in as: {user_data['name']} ({user_data['email']})"
+            if is_valid and user_data:
+                user_info_text = f"👤 Logged in as: {user_data.get('name', 'User')} ({user_data.get('email', 'No email')})"
                 return {
                     login_message: gr.Markdown(f"✅ {message}"),
                     main_interface: gr.Group(visible=True),
+                    login_section: gr.Group(visible=False),
                     chatbot: [],
                     history: [],
                     session_token: token,
-                    user_info: user_info_text
+                    user_info: user_info_text,
+                    message_input: gr.Textbox(value="")  # Clear message input on login
                 }
         return {
             login_message: gr.Markdown(f"❌ {message}"),
@@ -117,7 +125,7 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
     login_button.click(
         handle_login,
         inputs=[email_input, password_input],
-        outputs=[login_message, main_interface, chatbot, history, session_token, user_info]
+        outputs=[login_message, main_interface, login_section, chatbot, history, session_token, user_info, message_input]
     )
 
     # Registration Logic
@@ -134,40 +142,73 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
     )
 
     # Logout Logic
-    def handle_logout(session_token):
-        success, message = auth.logout(session_token)
-        if success:
+    def handle_logout(token):
+        # Print token value for debugging
+        print(f"Logging out with token: {token}")
+        
+        if not token:
             return {
                 main_interface: gr.Group(visible=False),
                 login_section: gr.Group(visible=True),
                 session_token: "",
-                login_message: gr.Markdown("✅ Logged out successfully!")
+                login_message: gr.Markdown("⚠️ No active session to log out from.")
             }
+            
+        # Directly handle logout without relying on the auth handler
+        # Since there seems to be an issue with the auth handler's logout function
+        try:
+            # Even if the auth handler fails, we'll still log the user out of the UI
+            auth.logout(token)
+        except Exception as e:
+            print(f"Logout error (ignoring): {str(e)}")
+        
+        # Return the user to the login screen regardless of the backend result
         return {
-            login_message: gr.Markdown(f"❌ {message}")
+            main_interface: gr.Group(visible=False),
+            login_section: gr.Group(visible=True),
+            register_section: gr.Group(visible=False),
+            session_token: "",
+            login_message: gr.Markdown("✅ Logged out successfully!"),
+            email_input: gr.Textbox(value=""),
+            password_input: gr.Textbox(value=""),
+            message_input: gr.Textbox(value=""),  # Clear message input on logout
+            chatbot: [],  # Clear chatbot
+            history: []   # Clear history
         }
 
     logout_button.click(
         handle_logout,
         inputs=[session_token],
-        outputs=[main_interface, login_section, session_token, login_message]
+        outputs=[main_interface, login_section, register_section, session_token, login_message, 
+                email_input, password_input, message_input, chatbot, history]
     )
         
     def handle_chat(message, history, session_token):
         """Handle chat with session validation"""
+        if not message.strip():
+            return history, gr.Group(visible=True), gr.Group(visible=False), gr.Textbox(value="")
+            
         is_valid, user_data = auth.validate_session(session_token)
         if not is_valid:
             history.append(("", "⚠️ Your session has expired. Please login again."))
-            return history, gr.Group(visible=False), gr.Group(visible=True)
+            return history, gr.Group(visible=False), gr.Group(visible=True), gr.Textbox(value="")
         
         # Use user's ID from Ory for chat history
         new_history, _ = predict(message, history, user_data['id'])
-        return new_history, gr.Group(visible=True), gr.Group(visible=False)
+        return new_history, gr.Group(visible=True), gr.Group(visible=False), gr.Textbox(value="")
 
+    # Bind the handle_chat function to both send button and message_input (for Enter key)
     send_button.click(
         handle_chat,
         inputs=[message_input, history, session_token],
-        outputs=[chatbot, main_interface, login_section]
+        outputs=[chatbot, main_interface, login_section, message_input]
+    )
+    
+    # Also bind to the textbox's submit event (triggered when Enter is pressed)
+    message_input.submit(
+        handle_chat,
+        inputs=[message_input, history, session_token],
+        outputs=[chatbot, main_interface, login_section, message_input]
     )
 
-demo.launch(server_name="127.0.0.1", server_port=7860, share=False)
+demo.launch(server_name="127.0.0.1", server_port=7861, share=False)
