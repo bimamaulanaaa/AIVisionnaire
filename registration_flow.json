@@ -1,11 +1,11 @@
 {
-  "id": "c2f25db1-3056-42a0-aa38-264fb08caef5",
+  "id": "c6fa06fe-0e46-4781-9925-69d6b89fd275",
   "type": "api",
-  "expires_at": "2025-03-19T07:08:14.716945796Z",
-  "issued_at": "2025-03-19T06:08:14.716945796Z",
+  "expires_at": "2025-03-20T11:24:01.420378208Z",
+  "issued_at": "2025-03-20T10:24:01.420378208Z",
   "request_url": "https://musing-lamport-s483te6loq.projects.oryapis.com/self-service/registration/api",
   "ui": {
-    "action": "https://musing-lamport-s483te6loq.projects.oryapis.com/self-service/registration?flow=c2f25db1-3056-42a0-aa38-264fb08caef5",
+    "action": "https://musing-lamport-s483te6loq.projects.oryapis.com/self-service/registration?flow=c6fa06fe-0e46-4781-9925-69d6b89fd275",
     "method": "POST",
     "nodes": [
       {
