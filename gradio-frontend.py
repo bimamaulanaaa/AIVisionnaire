@@ -80,7 +80,7 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
                     container=False
                 )
                 send_button = gr.Button("Send", scale=1)
-
+    
     def show_login():
         return {
             login_section: gr.Group(visible=True),
