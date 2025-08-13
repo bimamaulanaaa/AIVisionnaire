@@ -1,10 +1,10 @@
 # AI Visionnaire
 
-An AI-powered chat application with secure authentication using Ory Cloud.
+An AI-powered chat application with secure authentication using Firebase.
 
 ## Features
 
-- Secure authentication with Ory Cloud
+- Secure authentication with Firebase Authentication
 - AI chat capabilities using OpenAI
 - Vector storage with Pinecone
 - Modern UI with Gradio
@@ -12,7 +12,7 @@ An AI-powered chat application with secure authentication using Ory Cloud.
 ## Prerequisites
 
 - Python 3.8 or higher
-- Ory Cloud account
+- Firebase project with Email/Password authentication enabled
 - OpenAI API key
 - Pinecone API key
 
@@ -46,7 +46,7 @@ cp .env.example .env
 5. Update the `.env` file with your:
    - OpenAI API key
    - Pinecone API key and settings
-   - Ory Cloud project URL and API key
+   - Firebase API key
 
 ## Running the Application
 
@@ -62,14 +62,13 @@ The application will be available at `http://localhost:7860`
 - `PINECONE_API_KEY`: Your Pinecone API key
 - `PINECONE_ENV`: Your Pinecone environment
 - `PINECONE_INDEX_NAME`: Your Pinecone index name
-- `ORY_PROJECT_URL`: Your Ory Cloud project URL
-- `ORY_API_KEY`: Your Ory Cloud API key
+- `FIREBASE_API_KEY`: Your Firebase project Web API key
 
 ## Project Structure
 
 - `gradio-frontend.py`: Main application file with Gradio UI
-- `auth_handler.py`: Authentication handling with Ory Cloud
-- `auth_config.py`: Ory Cloud configuration
+- `auth_handler.py`: Authentication handling with Firebase
+- `auth_config.py`: Firebase configuration
 - `assistant.py`: AI chat functionality
 - `requirementstwo.txt`: Python dependencies
 

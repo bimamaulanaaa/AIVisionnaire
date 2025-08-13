@@ -193,7 +193,7 @@ with gr.Blocks(theme=gr.themes.Soft(primary_hue="blue")) as demo:
             history.append(("", "⚠️ Your session has expired. Please login again."))
             return history, gr.Group(visible=False), gr.Group(visible=True), gr.Textbox(value="")
         
-        # Use user's ID from Ory for chat history
+        # Use user's ID from Firebase for chat history
         new_history, _ = predict(message, history, user_data['id'])
         return new_history, gr.Group(visible=True), gr.Group(visible=False), gr.Textbox(value="")
 
